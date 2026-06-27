@@ -22,6 +22,7 @@ The **Order Service** is a Spring Boot microservice responsible for managing pro
 - **Database**: PostgreSQL (Production) / H2 Database (Testing)
 - **Messaging**: RabbitMQ (Spring AMQP)
 - **API Documentation**: Springdoc OpenAPI / Swagger UI
+- **Containerization**: Docker & Docker Compose
 - **Build Tool**: Maven
 
 ---
@@ -58,8 +59,14 @@ The application properties are defined in `src/main/resources/application.proper
 
 ## Running the Application
 
-### 1. Start External Infrastructure
-Use Docker Compose to run PostgreSQL and RabbitMQ:
+### 1. Start External Infrastructure (Docker Setup)
+This microservice requires PostgreSQL and RabbitMQ. A `docker-compose.yml` file is provided to start them easily.
+
+When you start the containers, **Docker automatically initializes the database**:
+- **PostgreSQL**: The `order-db` container runs on port `5433`. It reads the environment variables from `docker-compose.yml` and auto-creates the database named **`order_db`** (username: `postgres`, password: `postgres`). Data is stored persistently in the `order_pgdata` Docker volume.
+- **RabbitMQ**: The `rabbitmq` container runs on port `5672` for messaging, and port `15672` for the management dashboard.
+
+To start PostgreSQL and RabbitMQ, run the following command:
 ```bash
 docker-compose up -d
 ```
