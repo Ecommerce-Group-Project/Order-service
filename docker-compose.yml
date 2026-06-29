@@ -9,7 +9,7 @@ volumes:
 
 services:
   order-db:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: order-db
     restart: unless-stopped
     environment:
@@ -20,7 +20,6 @@ services:
       - "5432:5432"
     volumes:
       - order-db-data:/var/lib/postgresql/data
-      - ./development_db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - order-network
     healthcheck:
@@ -30,7 +29,9 @@ services:
       retries: 5
 
   order-service:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     image: order-service-image:v1
     container_name: order-service-container
     restart: unless-stopped
