@@ -28,6 +28,26 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    # FIXED: Added to the network so order-service can connect
+    networks:
+      - order-network
+    # FIXED: Added healthcheck so condition: service_healthy works
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   order-service:
     build:
       context: .
@@ -46,8 +66,15 @@ services:
       - spring.datasource.password=123456789EP
       - springdoc.api-docs.enabled=false
       - springdoc.swagger-ui.enabled=false
+      # Added these so Spring Boot explicitly knows where to look for your fixed RabbitMQ container
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     networks:
       - order-network
     depends_on:
       order-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy

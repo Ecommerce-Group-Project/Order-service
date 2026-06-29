@@ -18,13 +18,33 @@ services:
       POSTGRES_USER: ecommerce_project
       POSTGRES_PASSWORD: 123456789EP
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - order-db-data:/var/lib/postgresql/data
     networks:
       - order-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ecommerce_project -d order_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    # FIXED: Added to the network so order-service can connect
+    networks:
+      - order-network
+    # FIXED: Added healthcheck so condition: service_healthy works
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
