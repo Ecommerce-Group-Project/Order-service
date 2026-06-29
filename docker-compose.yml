@@ -1,27 +1,52 @@
 version: '3.8'
 
-services:
-  order-db:
-    image: postgres:15
-    container_name: order-postgres
-    environment:
-      POSTGRES_DB: order_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5433:5432"
-    volumes:
-      - order_pgdata:/var/lib/postgresql/data
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+networks:
+  order-network:
+    driver: bridge
 
 volumes:
-  order_pgdata:
+  order-db-data:
+
+services:
+  order-db:
+    image: postgres:15-alpine
+    container_name: order-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: ecommerce_project
+      POSTGRES_PASSWORD: 123456789EP
+    ports:
+      - "5432:5432"
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+      - ./development_db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - order-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecommerce_project -d order_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  order-service:
+    build: .
+    image: order-service-image:v1
+    container_name: order-service-container
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_HOST=order-db
+      - DB_PORT=5432
+      - DB_NAME=order_db
+      - DB_SSL_MODE=disable
+      - spring.datasource.username=ecommerce_project
+      - spring.datasource.password=123456789EP
+      - springdoc.api-docs.enabled=false
+      - springdoc.swagger-ui.enabled=false
+    networks:
+      - order-network
+    depends_on:
+      order-db:
+        condition: service_healthy
