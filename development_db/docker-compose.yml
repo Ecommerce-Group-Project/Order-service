@@ -8,9 +8,10 @@ volumes:
   order-db-data:
 
 services:
+
   order-db:
     image: postgres:16-alpine
-    container_name: order-db
+    container_name: order-db_standalone
     restart: unless-stopped
     environment:
       POSTGRES_DB: order_db
@@ -47,34 +48,3 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  order-service:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    image: order-service-image:v1
-    container_name: order-service-container
-    restart: unless-stopped
-    ports:
-      - "8082:8082"
-    environment:
-      - DB_HOST=order-db
-      - DB_PORT=5432
-      - DB_NAME=order_db
-      - DB_SSL_MODE=disable
-      - spring.datasource.username=ecommerce_project
-      - spring.datasource.password=123456789EP
-      - springdoc.api-docs.enabled=false
-      - springdoc.swagger-ui.enabled=false
-      # Added these so Spring Boot explicitly knows where to look for your fixed RabbitMQ container
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - SPRING_RABBITMQ_USERNAME=guest
-      - SPRING_RABBITMQ_PASSWORD=guest
-    networks:
-      - order-network
-    depends_on:
-      order-db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
