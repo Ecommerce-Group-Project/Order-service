@@ -86,9 +86,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.organization=ecommerce-group-project \
+            -Dsonar.organization=enterprise-group-project \
             -Dsonar.projectKey=Ecommerce-Group-Project_Order-service \
-
+            -Dsonar.qualitygate.wait=true
        
 
       # Upload built jar
