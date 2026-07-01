@@ -7,7 +7,7 @@ RUN addgroup --system spring && \
 
 USER spring:spring
 
-COPY target/order-service.jar app.jar
+COPY order-service.jar app.jar
 
 EXPOSE 8082
 

@@ -96,7 +96,7 @@ jobs:
 
     env:
       RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
-      ACR_REGISTRY_NAME: ${{ vars.ACR_REGISTRY_NAME }}
+#      ACR_REGISTRY_NAME: ${{ vars.ACR_REGISTRY_NAME }}
       ACR_DOMAIN_NAME: ${{ vars.ACR_REGISTRY_NAME }}.azurecr.io
       REPOSITORY_NAME: ${{ vars.REPOSITORY_NAME }}
 
@@ -114,32 +114,48 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: order-service
-          path: target
+          path: .
 
-      # Login to Azure
-      - name: Azure Login
-        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
+#      # Login to Azure
+#      - name: Azure Login
+#        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
+#        with:
+#          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#      # Login to Azure Container Registry
+#      - name: Login to ACR
+#        run: az acr login --name ${{ env.ACR_REGISTRY_NAME }}
+
+
+      # Move the file out of the auto-generated artifact folder if it nested it
+      - name: Ensure JAR is in root
+        run: |
+          if [ -f "order-service/order-service.jar" ]; then
+            mv order-service/order-service.jar ./order-service.jar
+          fi
+          echo "=== Verifying file location ==="
+          ls -la
+      # 1. Log in to Docker Hub securely
+      - name: Login to Docker Hub
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # Login to Azure Container Registry
-      - name: Login to ACR
-        run: az acr login --name ${{ env.ACR_REGISTRY_NAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # Build and Push Docker Image
       - name: Build and Push Image
         id: build-image
         run: |
-          IMAGE_URI=${{ env.ACR_DOMAIN_NAME }}/${{ env.REPOSITORY_NAME }}:${{ github.sha }}
-  
+          IMAGE_URI="wicky2001/order_service:${{ github.sha }}"
+          
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
-  
+          
           echo "image=$IMAGE_URI" >> $GITHUB_OUTPUT
 
       # Checkout GitOps repository
       - name: Checkout GitOps Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           repository: ${{ env.INFRA_REPO }}
           token: ${{ secrets.GITOPS_REPO_TOKEN }}
