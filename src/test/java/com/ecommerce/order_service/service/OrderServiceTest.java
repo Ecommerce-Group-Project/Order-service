@@ -73,7 +73,7 @@ class OrderServiceTest {
         assertEquals("Test Product", result.getProductName());
         assertEquals(100.0, result.getTotalPrice());
 
-        verify(restTemplate).getForObject("http://localhost:8081/products/100", ProductResponse.class);
+        verify(restTemplate).getForObject("http://localhost:8081/api/products/100", ProductResponse.class);
         verify(orderRepository).save(any(Order.class));
         verify(eventPublisher).publishOrderEvent(savedOrder);
     }
