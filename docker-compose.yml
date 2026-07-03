@@ -36,8 +36,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: default_user
+      RABBITMQ_DEFAULT_PASS: default_pass
     # FIXED: Added to the network so order-service can connect
     networks:
       - order-network
@@ -62,15 +62,15 @@ services:
       - DB_PORT=5432
       - DB_NAME=order_db
       - DB_SSL_MODE=disable
-      - spring.datasource.username=ecommerce_project
-      - spring.datasource.password=123456789EP
+      - PRODUCT_SERVICE_URL=http://product-service:8081
+      - DB_USERNAME=ecommerce_project
+      - DB_PASSWORD=123456789EP
       - springdoc.api-docs.enabled=false
       - springdoc.swagger-ui.enabled=false
-      # Added these so Spring Boot explicitly knows where to look for your fixed RabbitMQ container
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - SPRING_RABBITMQ_USERNAME=guest
-      - SPRING_RABBITMQ_PASSWORD=guest
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=default_user
+      - RABBITMQ_PASSWORD=default_pass
     networks:
       - order-network
     depends_on:

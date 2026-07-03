@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: ${SERVER_PORT:8082}
 
 spring:
   datasource:
@@ -17,12 +17,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:default_user}
+    password: ${RABBITMQ_PASSWORD:default_pass}
 
 product:
   service:
-    url: http://localhost:8081
+    url: ${PRODUCT_SERVICE_URL:http://localhost:8081}
