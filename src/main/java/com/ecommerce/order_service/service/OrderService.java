@@ -55,7 +55,7 @@ public class OrderService {
     }
 
     private ProductResponse fetchProduct(Long productId) {
-        String url = productServiceUrl + "/products/" + productId;
+        String url = productServiceUrl + "/api/products/" + productId;
         try {
             ProductResponse product = restTemplate.getForObject(url, ProductResponse.class);
             log.info("Fetched product from Product Service: {}", product);
