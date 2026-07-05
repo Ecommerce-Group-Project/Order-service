@@ -21,6 +21,16 @@ public class OrderEventPublisher {
         message.put("customerId", order.getCustomerId());
         message.put("productName", order.getProductName());
         message.put("totalPrice", order.getTotalPrice());
+        message.put("timestamp", System.currentTimeMillis());
+        message.put("quantity", order.getQuantity());
+        message.put(
+                "message",
+                "Order #" + order.getOrderId() +
+                        " has been placed successfully. " +
+                        order.getQuantity() + " x " + order.getProductName() +
+                        " purchased for a total price of " + order.getTotalPrice() + "."
+        );
+
 
         amqpTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE_NAME,
